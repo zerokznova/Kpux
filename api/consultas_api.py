@@ -1,26 +1,22 @@
 import requests
 
-API_URL = "https://voidsearch.localto.net/api/search" 
+API_URL = "https://voidsearch.localto.net/api/search"
 API_KEY = "WM3t-Av5u-thfP-GiBV-sM3B"
 
-def buscar_dados(base, valor): try: params = { "Access-Key": API_KEY, "Base": base, "query": valor  # Corrigido: "Query" -> "query" } response = requests.get(API_URL, params=params, timeout=10)
+def buscar_dados(base, valor):
+    if not valor:
+        return {"error": "Informe os dados que serão consultados."}
 
-try:
-        data = response.json()
-    except ValueError:
-        return "Erro: resposta da API não está em formato JSON válido."
+    params = {
+        "Access-Key": API_KEY,
+        "Base": base,
+        "query": valor  # Certifique-se que seja 'query', com q minúsculo
+    }
 
-    if isinstance(data, dict):
-        if not data:
-            return "Nenhum dado encontrado para a consulta."
-        texto = ""
-        for chave, valor in data.items():
-            texto += f"🔹 {chave}: {valor}\n"
-        return texto.strip()
-    else:
-        return "Erro: formato de dados inesperado na resposta da API."
-except requests.exceptions.RequestException as e:
-    return f"Erro na requisição: {e}"
-except Exception as e:
-    return f"Erro inesperado: {e}"
-
+    try:
+        response = requests.get(API_URL, params=params, timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        return {"error": f"Erro na requisição: {response.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
